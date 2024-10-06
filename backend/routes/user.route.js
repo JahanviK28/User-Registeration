@@ -9,7 +9,7 @@ const {
   errorMessage,
 } = require("../enums/response-message.enum");
 const { default: mongoose } = require("mongoose");
-
+const multer = require("multer");
 const upload = multer({ storage: storage });
 
 // @route   POST /api/register
