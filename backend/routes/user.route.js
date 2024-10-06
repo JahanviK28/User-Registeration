@@ -15,6 +15,7 @@ const upload = multer({ storage: storage });
 // @route   POST /api/register
 // @desc    Register a new user
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
+  console.log("In resgister user API")
   try {
     await createUser(req.body, req.file ? req.file.path : "");
     return res.status(201).send({
@@ -23,13 +24,14 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
     });
   } catch (error) {
     console.error("Error in registration:", error);
-    return res.status(500).send({ message: error, success: false });
+    return res.status(500).send({ message: error.message, success: false });
   }
 });
 
 // @route   GET /api/users
 // @desc    Get all registered users
 router.get("/users", async (req, res) => {
+  console.log("In get users API")
   try {
     const users = await getUsers();
     return res.status(200).send({
@@ -39,7 +41,7 @@ router.get("/users", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return res.status(500).json({ message: error, success: false });
+    return res.status(500).json({ message: error.messgae, success: false });
   }
 });
 
@@ -64,7 +66,7 @@ router.put("/users/:id", upload.single("profilePicture"), async (req, res) => {
       });
   } catch (error) {
     console.error("Error updating user:", error);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -85,7 +87,7 @@ router.delete("/users/:id", async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting user:", error);
-    return res.status(500).send({ message: error, success: false });
+    return res.status(500).send({ message: error.message, success: false });
   }
 });
 
