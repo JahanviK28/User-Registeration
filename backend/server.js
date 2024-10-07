@@ -10,11 +10,7 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your frontend URL
-  methods: ['GET', 'POST'], // Specify allowed methods
-  allowedHeaders: ['Content-Type'], // Specify allowed headers
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve static files
