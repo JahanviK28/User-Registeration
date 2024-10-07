@@ -6,6 +6,7 @@ backend/logs/
 
 # Environment Variables
 backend/.env
+frontend/.env
 
 # Build Files
 frontend/build/

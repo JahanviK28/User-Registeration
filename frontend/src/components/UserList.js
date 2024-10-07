@@ -1,104 +1,338 @@
 // frontend/src/components/UserList.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { FaPencilAlt, FaTrash, FaTimes, FaEyeSlash, FaEye } from 'react-icons/fa'; // Importing icons
+
+import './UserList.css'; // Importing CSS for styling
 
 const UserList = () => {
+  // State to hold the list of users
   const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState('');
 
+  // State for Delete Modal
+  const [deleteUserId, setDeleteUserId] = useState(null);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // State for Edit Modal
+  const [editUserId, setEditUserId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    contactInfo: '',
+    password: '',
+  });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // State for Notifications
+  const [notification, setNotification] = useState({
+    message: '',
+    type: '', // 'success' or 'error'
+    visible: false,
+  });
+
+  // State for Password Visibility in Edit Modal
+  const [showEditPassword, setShowEditPassword] = useState(false);
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  // eslint-disable-next-line no-use-before-define
+  }, []);
+
+  // Function to fetch users from the backend
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/users');
-      setUsers(res.data.data);
+      const res = await axios.get(`http://localhost:5000/api/users`); // Adjust the API endpoint as needed
+      setUsers(res.data.data); // Assuming the response structure { data: [...] }
     } catch (error) {
-      setMessage('Error fetching users.');
+      console.error('Error fetching users:', error);
+      showNotification('Failed to fetch users.', 'error');
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Function to show notifications
+  const showNotification = (message, type) => {
+    setNotification({
+      message,
+      type,
+      visible: true,
+    });
 
-  const deleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    // Auto-hide notification after 3 seconds
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, visible: false }));
+    }, 3000);
+  };
 
+  // Function to hide notifications manually
+  const hideNotification = () => {
+    setNotification((prev) => ({ ...prev, visible: false }));
+  };
+
+  // ----------------- Delete Functionality -----------------
+
+  // Open Delete Modal
+  const openDeleteModal = (userId) => {
+    setDeleteUserId(userId);
+    setDeleteConfirmationText('');
+    setIsDeleteModalOpen(true);
+  };
+
+  // Close Delete Modal
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteUserId(null);
+    setDeleteConfirmationText('');
+  };
+
+  // Handle Delete Confirmation
+  const handleDelete = async () => {
+    if (deleteConfirmationText === 'DELETE') {
+      try {
+        await axios.delete(`http://localhost:5000/api/users/${deleteUserId}`); // Adjust API endpoint as needed
+        setUsers(users.filter((user) => user._id !== deleteUserId));
+        showNotification('User deleted successfully.', 'success');
+        closeDeleteModal();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showNotification('Failed to delete user.', 'error');
+      }
+    } else {
+      showNotification('Please type DELETE to confirm.', 'error');
+    }
+  };
+
+  // ----------------- Edit Functionality -----------------
+
+  // Open Edit Modal
+  const openEditModal = async (userId) => {
+    setEditUserId(userId);
+    setIsEditModalOpen(true);
     try {
-      const res = await axios.delete(`http://localhost:5000/api/users/${id}`);
-      setMessage(res.data.message);
-      fetchUsers(); // Refresh the list
+      const res = await axios.get(`http://localhost:5000/api/users/${userId}`); // Adjust API endpoint as needed
+      const user = res.data.data; // Assuming response structure { data: { ... } }
+      setEditFormData({
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        contactInfo: user.contactInfo,
+        password: '', // Do not pre-fill password for security
+      });
     } catch (error) {
-      setMessage('Error deleting user.');
+      console.error('Error fetching user details:', error);
+      showNotification('Failed to fetch user details.', 'error');
+      closeEditModal();
+    }
+  };
+
+  // Close Edit Modal
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditUserId(null);
+    setEditFormData({
+      name: '',
+      email: '',
+      username: '',
+      contactInfo: '',
+      password: '',
+    });
+    setShowEditPassword(false);
+  };
+
+  // Handle Edit Form Changes
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Handle Edit Save
+  const handleEditSave = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/users/${editUserId}`, editFormData); // Adjust API endpoint as needed
+      // Update user in the local state
+      setUsers(
+        users.map((user) =>
+          user._id === editUserId ? { ...user, ...editFormData } : user
+        )
+      );
+      showNotification('User updated successfully.', 'success');
+      closeEditModal();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      showNotification('Failed to update user.', 'error');
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Registered Users</h2>
-      {message && <p>{message}</p>}
-      <table style={styles.table}>
+    <div className="userlist-container">
+      <h2>User List</h2>
+      <table className="userlist-table">
         <thead>
           <tr>
-            <th>Profile Picture</th>
             <th>Name</th>
             <th>Email</th>
             <th>Username</th>
-            <th>Contact Info</th>
+            <th>contactInfo</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users?.map(user => (
-            <tr key={user._id}>
-              <td>
-                {user.profilePicture ? (
-                  <img src={`http://localhost:5000/${user.profilePicture}`} alt="Profile" style={styles.image} />
-                ) : (
-                  'No Image'
-                )}
-              </td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.username}</td>
-              <td>{user.contactInfo}</td>
-              <td>
-                <Link to={`/update/${user._id}`} style={styles.link}>Update</Link>
-                <button onClick={() => deleteUser(user._id)} style={styles.deleteButton}>Delete</button>
+          {users.length > 0 ? (
+            users.map((user) => (
+              <tr key={user._id}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.username}</td>
+                <td>{user.contactInfo}</td>
+                <td>
+                  <button
+                    className="action-button edit-button"
+                    onClick={() => openEditModal(user._id)}
+                    title="Edit User"
+                  >
+                    <FaPencilAlt />
+                  </button>
+                  <button
+                    className="action-button delete-button"
+                    onClick={() => openDeleteModal(user._id)}
+                    title="Delete User"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="no-users">
+                No users found.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Confirm Delete</h3>
+            <p>
+              To delete this user, please type <strong>DELETE</strong> below:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="modal-input"
+            />
+            <div className="modal-buttons">
+              <button className="modal-button cancel-button" onClick={closeDeleteModal}>
+                Cancel
+              </button>
+              <button
+                className="modal-button confirm-button"
+                onClick={handleDelete}
+                disabled={deleteConfirmationText !== 'DELETE'}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {isEditModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Edit User</h3>
+            <form className="edit-form">
+              <input
+                type="text"
+                name="name"
+                value={editFormData.name}
+                onChange={handleEditChange}
+                placeholder="Full Name"
+                className="modal-input"
+                autoComplete="name"
+              />
+              <input
+                type="email"
+                name="email"
+                value={editFormData.email}
+                onChange={handleEditChange}
+                placeholder="Email ID"
+                className="modal-input"
+                autoComplete="email"
+              />
+              <input
+                type="text"
+                name="username"
+                value={editFormData.username}
+                onChange={handleEditChange}
+                placeholder="Username"
+                className="modal-input"
+                autoComplete="username"
+              />
+              <input
+                type="text"
+                name="contactInfo"
+                value={editFormData.contactInfo}
+                onChange={handleEditChange}
+                placeholder="Contact Info"
+                className="modal-input"
+                autoComplete="tel"
+              />
+              <div className="password-container">
+                <input
+                  type={showEditPassword ? 'text' : 'password'}
+                  name="password"
+                  value={editFormData.password}
+                  onChange={handleEditChange}
+                  placeholder="New Password"
+                  className="modal-input password-input"
+                />
+                <span
+                  onClick={() => setShowEditPassword(!showEditPassword)}
+                  className="eye-icon"
+                >
+                  {showEditPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+            </form>
+            <div className="modal-buttons">
+              <button className="modal-button cancel-button" onClick={closeEditModal}>
+                Cancel
+              </button>
+              <button
+                className="modal-button save-button"
+                onClick={handleEditSave}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Popup */}
+      {notification.visible && (
+        <div className={`notification-popup ${notification.type}`}>
+          <span>{notification.message}</span>
+          <FaTimes className="notification-close-icon" onClick={hideNotification} />
+        </div>
+      )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '20px',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  image: {
-    width: '50px',
-    height: '50px',
-    objectFit: 'cover',
-  },
-  link: {
-    marginRight: '10px',
-    textDecoration: 'none',
-    color: 'blue',
-  },
-  deleteButton: {
-    padding: '5px 10px',
-    backgroundColor: 'red',
-    color: '#fff',
-    border: 'none',
-    cursor: 'pointer',
-  },
 };
 
 export default UserList;

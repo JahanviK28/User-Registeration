@@ -2,7 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { createUser, getUsers, deleteUser, updateUser } = require("../helper/user.helper");
+const { createUser, getUsers, deleteUser, updateUser, getUserData } = require("../helper/user.helper");
 const { storage } = require("../configurations/multer.config");
 const {
   successMessage,
@@ -15,7 +15,6 @@ const upload = multer({ storage: storage });
 // @route   POST /api/register
 // @desc    Register a new user
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
-  console.log("In resgister user API")
   try {
     await createUser(req.body, req.file ? req.file.path : "");
     return res.status(201).send({
@@ -28,10 +27,31 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
   }
 });
 
+// @route GET /api/users/:id
+// @desc Get specific user details
+router.get("/users/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .send({ success: false, message: errorMessage.INVALID_DATA });
+    }
+    const user = await getUserData(userId);
+    return res.status(200).send({
+      success: true,
+      message: successMessage.USER_LIST_FETCHED_SUCCESSFULLY,
+      data: user,
+    });  
+  } catch (error) {
+    
+    }
+})
+
+
 // @route   GET /api/users
 // @desc    Get all registered users
 router.get("/users", async (req, res) => {
-  console.log("In get users API")
   try {
     const users = await getUsers();
     return res.status(200).send({

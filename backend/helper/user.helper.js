@@ -2,7 +2,7 @@ const { logger } = require("../configurations/logger.config");
 const User = require("../models/user.model");
 const { errorMessage } = require("../enums/response-message.enum");
 const { error } = require("winston");
-const { Types } = require("mongoose");
+const mongoose = require("mongoose");
 
 /**
  * Helper function to create a user
@@ -73,7 +73,7 @@ async function updateUser(userId, filePath, bodyData) {
     bodyData?.contactInfo ? (updates.contactInfo = bodyData.contactInfo) : null;
     filePath ? (updates.profilePicture = filePath) : null;
     const updatedUser = await User.findByIdAndUpdate(
-      { _id: Types.ObjectId(userId) },
+      { _id: userId},
       updates,
       {
         new: true,
@@ -111,4 +111,23 @@ async function deleteUser(userId) {
   }
 }
 
-module.exports = { createUser, getUsers, deleteUser, updateUser };
+/**
+ * Helper function to get user data
+ * @param {*} userId - user id to get the user
+ */
+async function getUserData(userId) {
+  try {
+    const user = await User.findOne({ _id: userId }).exec();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user
+  } catch (error) {
+    logger.error(errorMessage.GET_USER_FAILURE, {
+      error: error?.message,
+    });
+    throw new Error(error.message);
+  }
+}
+
+module.exports = { createUser, getUsers, deleteUser, updateUser, getUserData};

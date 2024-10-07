@@ -24,7 +24,7 @@ const UpdateUser = () => {
     // Fetch user data
     const fetchUser = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/users');
+        const res = await axios.get(`http://localhost:5000/api/users`);
         const user = res.data.find(u => u._id === id);
         if (user) {
           setFormData({

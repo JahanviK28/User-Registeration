@@ -1,0 +1,247 @@
+/* frontend/src/components/UserList.css */
+
+/* Container Styling */
+.userlist-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 50px auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .userlist-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Table Styling */
+  .userlist-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .userlist-table th,
+  .userlist-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .userlist-table th {
+    background-color: #f2f2f2;
+    color: #333;
+  }
+  
+  .userlist-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .userlist-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .no-users {
+    text-align: center;
+    color: #777;
+  }
+  
+  /* Action Buttons Styling */
+  .action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    margin-right: 5px;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .edit-button {
+    color: #007bff;
+  }
+  
+  .delete-button {
+    color: #dc3545;
+  }
+  
+  .edit-button:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+  
+  .delete-button:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+  
+  /* Modal Overlay Styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal Styling */
+  .modal {
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .modal h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .modal p {
+    color: #555;
+    margin-bottom: 15px;
+  }
+  
+  .modal-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .password-container {
+    position: relative;
+  }
+  
+  .password-input {
+    width: 100%;
+    padding-right: 40px; /* Space for the eye icon */
+  }
+  
+  .eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+    font-size: 18px;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cancel-button {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  
+  .confirm-button {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  .save-button {
+    background-color: #28a745;
+    color: #fff;
+  }
+  
+  .cancel-button:hover {
+    background-color: #5a6268;
+  }
+  
+  .confirm-button:hover {
+    background-color: #c82333;
+  }
+  
+  .save-button:hover {
+    background-color: #218838;
+  }
+  
+  .confirm-button:disabled {
+    background-color: #a9a9a9;
+    cursor: not-allowed;
+  }
+  
+  .save-button:disabled {
+    background-color: #a9a9a9;
+    cursor: not-allowed;
+  }
+  
+  /* Notification Popup Styling */
+  .notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1100;
+    animation: slideIn 0.5s ease-in-out;
+  }
+  
+  .notification-popup.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .notification-popup.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  .notification-close-icon {
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    .modal {
+      width: 90%;
+      padding: 20px 25px;
+    }
+  
+    .userlist-table th,
+    .userlist-table td {
+      padding: 10px;
+    }
+  }
+  
